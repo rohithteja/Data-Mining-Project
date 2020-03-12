@@ -1,2 +1,2 @@
-# R-Programmin
+# R-Programming
 R programming code
