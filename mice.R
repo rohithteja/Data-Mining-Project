@@ -1,6 +1,8 @@
 library(caret)
+library(tictoc)
+tic.clearlog()
 library(rlist)
-#install.packages("MLmetrics")
+#install.packages("sys")
 library(MLmetrics)
 library(Amelia)
 set.seed(69)
@@ -42,7 +44,9 @@ test <- data_model[index,]
 
 #CASE 1 - model building without PCA
 # random forest model with 10 fold cross validation
+tic("RandomForest")
 fit.rf <- train(class~., data=train, method="rf", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = TRUE)
 print(fit.rf$results)
 predictions_rf <- predict(fit.rf, test)
 confusionMatrix(predictions_rf, test$class)
@@ -52,33 +56,48 @@ accuracy.rf <- Accuracy(predictions_rf,test[,77])
 
 
 #svm
+tic("SVM")
 fit.svm <- train(class~., data=train, method="svmRadial", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.svm$results)
 predictions_svm <- predict(fit.svm, test)
 confusionMatrix(predictions_svm, test$class)
 accuracy.svm <- Accuracy(predictions_svm,test[,77])
 
 #knn
+tic("KNN")
 fit.knn <- train(class~., data=train, method="knn", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
+print(t1)
 print(fit.knn$results)
 predictions_knn <- predict(fit.knn, test)
 confusionMatrix(predictions_knn, test$class)
 accuracy.knn <- Accuracy(predictions_knn,test[,77])
 
 #nn
+tic("NeuralNetwork")
 fit.nn <- train(class~., data=train, method="nnet", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nn$results)
 predictions_nn <- predict(fit.nn, test)
 confusionMatrix(predictions_nn, test$class)
 accuracy.nn <- Accuracy(predictions_nn,test[,77])
 
 #nb
+tic("NaiveBayes")
 fit.nb <- train(class~., data=train, method="nb", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nb$results)
 predictions_nb <- predict(fit.nb, test)
 confusionMatrix(predictions_nb, test$class)
 accuracy.nb <- Accuracy(predictions_nb,test[,77])
 
+#time elapsed calculation
+timelist <- tic.log() 
+case1.time = data.frame(timelist)
+colnames(case1.time) <- NULL
+case1.time <- t(case1.time)
+case1.time
 
 # summarize accuracy of models
 results <- resamples(list( KNN=fit.knn, RandomForest=fit.rf,SVM=fit.svm,NeuralNetworks=fit.nn,NaiveBayes=fit.nb))
@@ -108,7 +127,9 @@ test_pca <- data_model_pca[index_pca,]
 
 #model building withPCA
 # rf.pca
+tic("RandomForest.pca")
 fit.rf.pca <- train(class~., data=train_pca, method="rf", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.rf.pca$results)
 predictions_rf.pca <- predict(fit.rf.pca, test_pca)
 confusionMatrix(predictions, test_pca$class)
@@ -116,28 +137,36 @@ varImp(fit.rf.pca$finalModel)
 accuracy.rf.pca <- Accuracy(predictions_rf.pca,test_pca[,11])
 
 #svm.pca
+tic("SVM.pca")
 fit.svm.pca <- train(class~., data=train_pca, method="svmRadial", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.svm.pca$results)
 predictions_svm.pca <- predict(fit.svm.pca, test_pca)
 confusionMatrix(predictions_svm.pca, test_pca$class)
 accuracy.svm.pca <- Accuracy(predictions_svm.pca,test_pca[,11])
 
 #knn
+tic("KNN.pca")
 fit.knn.pca <- train(class~., data=train_pca, method="knn", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.knn.pca$results)
 predictions_knn.pca <- predict(fit.knn.pca, test_pca)
 confusionMatrix(predictions_knn.pca, test_pca$class)
 accuracy.knn.pca <- Accuracy(predictions_knn.pca,test_pca[,11])
 
 #nn
+tic("NeuralNetwork.pca")
 fit.nn.pca <- train(class~., data=train_pca, method="nnet", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nn.pca$results)
 predictions_nn.pca <- predict(fit.nn.pca, test_pca)
 confusionMatrix(predictions_nn.pca, test_pca$class)
 accuracy.nn.pca <- Accuracy(predictions_nn.pca,test_pca[,11])
 
 #nb
+tic("NaiveBayes.pca")
 fit.nb.pca <- train(class~., data=train_pca, method="nb", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nb.pca$results)
 predictions_nb.pca <- predict(fit.nb.pca, test_pca)
 confusionMatrix(predictions_nb.pca, test_pca$class)
@@ -152,7 +181,12 @@ rownames(accuracy_Case2) <- "TestAccuracy"
 accuracy_Case2 <- t(accuracy_Case2)
 accuracy_Case2
 
-
+#case 2 time elapsed calculation
+timelist2 <- tic.log() 
+case2.time = data.frame(timelist2)
+colnames(case2.time) <- NULL
+case2.time <- t(case2.time)
+case2.time
 
 # CASE 3 - TOP 5 features
 # varImp(fit.rf$finalModel) gives the list of features with their 
@@ -162,7 +196,9 @@ test5 <- test[,c("SOD1_N","pERK_N","CaNA_N","DYRK1A_N","pPKCG_N","class")]
 
 #model building with 5 features
 # rf
+tic("RandomForest")
 fit.rf5 <- train(class~., data=train5, method="rf", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.rf5$results)
 predictions_rf5 <- predict(fit.rf5, test5)
 confusionMatrix(predictions.rf5, test5$class)
@@ -172,28 +208,36 @@ accuracy.rf5 <- Accuracy(predictions_rf5,test5[,6])
 
 
 #svm
+tic("SVM")
 fit.svm5 <- train(class~., data=train5, method="svmRadial", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.svm5$results)
 predictions_svm5 <- predict(fit.svm5, test5)
 confusionMatrix(predictions_svm5, test5$class)
 accuracy.svm5 <- Accuracy(predictions_svm5,test5[,6])
 
 #knn
+tic("KNN")
 fit.knn5 <- train(class~., data=train5, method="knn", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.knn5$results)
 predictions_knn5 <- predict(fit.knn5, test5)
 confusionMatrix(predictions_knn5, test5$class)
 accuracy.knn5 <- Accuracy(predictions_knn5,test5[,6])
 
 #nn
+tic("NeuralNetwork")
 fit.nn5 <- train(class~., data=train5, method="nnet", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nn5$results)
 predictions_nn5 <- predict(fit.nn5, test5)
 confusionMatrix(predictions_nn5, test5$class)
 accuracy.nn5 <- Accuracy(predictions_nn5,test5[,6])
 
 #nb
+tic("NaiveBayes")
 fit.nb5 <- train(class~., data=train5, method="nb", metric="Accuracy",trControl=trainControl(method="cv", number=10))
+toc(log = TRUE, quiet = FALSE)
 print(fit.nb5$results)
 predictions_nb5 <- predict(fit.nb5, test5)
 confusionMatrix(predictions_nb5, test5$class)
@@ -208,3 +252,11 @@ accuracy_Case3 <- data.frame( KNN=accuracy.knn5, RandomForest=accuracy.rf5,SVM=a
 rownames(accuracy_Case3) <- "TestAccuracy"
 accuracy_Case3 <- t(accuracy_Case3)
 accuracy_Case3	
+	
+#case 3 time elapsed calculation
+timelist3 <- tic.log() 
+case3.time = data.frame(timelist3)
+colnames(case3.time) <- NULL
+case3.time <- t(case3.time)
+case3.time	
+	
