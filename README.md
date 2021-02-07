@@ -1,4 +1,4 @@
-# M1 Data Mining Project
+# Data Mining Project
 Code for Data Mining Project March 2020
 
 Dataset: Mice Protein Expression Data Set from https://archive.ics.uci.edu/ml/datasets/Mice+Protein+Expression
